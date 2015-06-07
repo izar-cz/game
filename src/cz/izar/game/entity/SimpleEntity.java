@@ -1,7 +1,7 @@
 package cz.izar.game.entity;
 
-import cz.izar.game.entity.event.Event;
 import cz.izar.game.entity.manager.SimpleBlueprint;
+import cz.izar.game.event.Event;
 import cz.izar.game.presentation.Presentation;
 
 
@@ -38,11 +38,6 @@ public class SimpleEntity extends FeaturefulEntity {
 		return getBlueprint().getProp(propType);
 	}
 
-	@Override
-	public void handle(Event event) {
-		// TODO
-		throw new RuntimeException("unimplemented");
-	}
 
 
 }

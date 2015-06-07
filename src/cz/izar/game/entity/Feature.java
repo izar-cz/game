@@ -1,7 +1,13 @@
 package cz.izar.game.entity;
 
-import cz.izar.game.Target;
+import cz.izar.game.tree.ListNode;
+import cz.izar.game.tree.Node;
 
-public interface Feature extends Target {
+public class Feature extends ListNode<Node> {
+
+	@Override
+	public String getTypeName() {
+		return "feature";
+	}
 
 }

@@ -1,0 +1,91 @@
+package cz.izar.game.tree;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import cz.izar.game.event.Event;
+import cz.izar.game.event.Listener;
+
+public abstract class BasicNode extends Node {
+	
+	// implementation of Observable interface
+
+	private Map<String, List<Listener>> listeners = null;
+
+	@Override
+	public synchronized boolean on(String type, Listener listener) {
+		if (null == listener) {
+			throw new NullPointerException();
+		}
+		if (null == listeners) {
+			listeners = new HashMap<String, List<Listener>>();
+		}
+		List<Listener> typeListeners = listeners.get(type);
+		if (null != typeListeners) {
+			return typeListeners.contains(listener)
+				? false
+				: typeListeners.add(listener);
+		} else {
+			typeListeners = new Vector<Listener>();
+			listeners.put(type, typeListeners);
+			return typeListeners.add(listener);
+		}
+	}
+
+	@Override
+	public synchronized boolean off(Listener listener) {
+		if (null == listeners) {
+			return false;
+		}
+		for (Map.Entry<String, List<Listener>> entry: listeners.entrySet()){
+			entry.getValue().remove(listener);
+		}
+		return false;
+	}
+
+	@Override
+	public synchronized void off(String type) {
+		if (null == listeners) {
+			return;
+		}
+		List<Listener> typeListeners = listeners.get(type);
+		if (null != typeListeners) {
+			typeListeners.clear();
+		}
+	}
+
+	@Override
+	public synchronized void off() {
+		if (null == listeners) {
+			return;
+		}
+		listeners.clear();
+	}
+
+
+	@Override
+	public void dispatch(Event event) {
+		if (null == listeners) {
+			return;
+		}
+		String type = event.getType();
+
+		Object[] arrLocal;
+		synchronized (this) {
+			List<Listener> typeListeners = listeners.get(type);
+			if (null == typeListeners) {
+				return;
+			}
+			arrLocal = typeListeners.toArray();
+		}
+		
+		for (int i = arrLocal.length-1; i>=0; i--) {
+			((Listener)arrLocal[i]).handle(event);
+		}
+	}
+
+
+	
+}

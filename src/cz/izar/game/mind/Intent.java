@@ -1,10 +1,10 @@
 package cz.izar.game.mind;
 
-import cz.izar.game.Target;
 import cz.izar.game.entity.Entity;
 import cz.izar.game.entity.action.ActionType;
 import cz.izar.game.entity.action.ManipulateAction;
 import cz.izar.game.map.Direction;
+import cz.izar.game.tree.Node;
 
 
 public class Intent {
@@ -14,12 +14,12 @@ public class Intent {
 	// all this properties are optional (i.e. null value is permitted)
 	private final Direction direction;
 	// TODO: use representation/observation instead of actual entity
-	private final Target target;
+	private final Node target;
 	private final Entity tool;
 	private final Enum<?> subtype;
 	private final Object additionalData;
 
-	private Intent( ActionType type, Target target, Direction direction, Entity tool, Enum<?> subtype, Object additionalData ) {
+	private Intent( ActionType type, Node target, Direction direction, Entity tool, Enum<?> subtype, Object additionalData ) {
 		this.type = type;
 		this.direction = direction;
 		this.target = target;
@@ -44,7 +44,7 @@ public class Intent {
 	public Direction getDirection() {
 		return direction;
 	}
-	public Target getTarget() {
+	public Node getTarget() {
 		return target;
 	}
 	public Entity getTool() {

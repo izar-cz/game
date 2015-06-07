@@ -78,16 +78,14 @@ game = (function(){
 			mapHeight = mapConfig.height;
 
 
-		var environment = new gamePackage.Environment( _world ),
+		var environment = new gamePackage.Environment( mapWidth, mapHeight ),
 			_placeEntity = function( blueprintId, x, y ) {
 				log( 'placing entity "'+blueprintId+'" at ('+x+', '+y+')' );
 				var entity = _entityManager.createEntity(blueprintId);
 				environment.placeEntity( entity, new gamePackage.map.Coordinates(x, y) );
 			};
 
-		var map = new gamePackage.map.Map( environment, mapWidth, mapHeight );
-		environment.setMap(map);
-		world.setEnvironment( environment );
+		_world.appendChild( environment );
 
 		if ('string' === typeof mapConfig.map) {
 			mapConfig.map = mapConfig.map.split("\n");
@@ -109,7 +107,7 @@ game = (function(){
 					throw 'invalid tile';
 				}
 				tile = _tileManager.createTile(tileConfig.tile);
-				map.setAt(x,y,tile);
+				environment.setNodeAt(new gamePackage.map.Coordinates(x, y), tile);
 				if( tileConfig.entity ) {
 					_placeEntity( tileConfig.entity, x, y );
 				}

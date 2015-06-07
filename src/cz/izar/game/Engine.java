@@ -35,9 +35,9 @@ public class Engine {
 		}
 		while ( true ) {
 			
-			// TODO: world shoud be able to hold more environments, take care of all of them
-			Environment environment = world.getEnvironment();
-			
+			// TODO: take care of all environments
+			Environment environment = world.getChildNodes().iterator().next();
+
 			environment.tick();
 //			long delta = System.currentTimeMillis() - lastLoopTime;
 //			lastLoopTime = System.currentTimeMillis();

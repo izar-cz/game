@@ -2,17 +2,17 @@ package cz.izar.game.entity;
 
 
 import cz.izar.game.Environment;
-import cz.izar.game.Log;
-import cz.izar.game.Target;
-import cz.izar.game.entity.event.EventHandler;
 import cz.izar.game.entity.manager.Blueprint;
 import cz.izar.game.map.Coordinates;
-import cz.izar.game.map.Map;
 import cz.izar.game.map.OffsetCoordinates;
+import cz.izar.game.map.Tile;
 import cz.izar.game.presentation.Presentation;
+import cz.izar.game.tree.ListNode;
+import cz.izar.game.tree.Node;
 
 
-public abstract class Entity implements Target, EventHandler {
+
+public abstract class Entity extends ListNode<Node> {
 	
 	public static final int PROP_NAME = 1;
 	public static final int PROP_DESCRIPTION = 2;
@@ -25,9 +25,7 @@ public abstract class Entity implements Target, EventHandler {
 
 
 
-	private Coordinates location = null;
 	private OffsetCoordinates offset = OffsetCoordinates.CENTER;
-	private Environment environment = null;
 	private final long uid;
 
 	/**
@@ -82,45 +80,26 @@ public abstract class Entity implements Target, EventHandler {
 	}
 
 
+	public void insertItem(Entity item, Feature target)
+	{
+		// TODO: don't ignore target feature
+		this.appendChild(item);
+	}
 
 	// FINAL methods
-
-	public final void setEnvironment(Environment environment) {
-		this.environment = environment;
+	public final Tile getTile() {
+		Node node = this;
+		do {
+			node = node.getParent();
+		} while ( !(node instanceof Tile) && null != node );
+		return (Tile)node;
 	}
 	public final Environment getEnvironment() {
-		return environment;
-	}
-	public final Map getMap() {
-		return environment.getMap();
+		return (Environment)(getTile().getParent());
 	}
 
-	/**
-	 * change position of this entity on it's map
-	 * called e.g. when entity walks
-	 * @see cz.izar.game.entity.action.MoveAction
-	 * @param location new location of entity
-	 */
-	public final void setLocation( Coordinates location ) {
-		assert location != null : "location == null";
-		if( null != getMap() ) {
-			if( null != this.location ) {
-				getMap().getAt(this.location).removeEntity(this); // remove entity from last Tile
-			}
-			getMap().getAt(location).addEntity(this); // place entity to target Tile
-		} else {
-			Log.warn("setting Location for an Entity without a Map ("+toString()+")");
-		}
-		this.location = location;
-	}
-	public final void unsetLocation() {
-		if( null != location && null != getMap() ) {
-			getMap().getAt(location).removeEntity(this); // remove entity from last Tile
-		}
-		location = null;
-	}
 	public final Coordinates getLocation() {
-		return location;
+		return getTile().getLocation();
 	}
 	
 	public final OffsetCoordinates getOffset() {

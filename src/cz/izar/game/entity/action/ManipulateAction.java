@@ -1,7 +1,9 @@
 package cz.izar.game.entity.action;
 
+import cz.izar.game.Environment;
 import cz.izar.game.entity.Entity;
-import cz.izar.game.entity.event.Event;
+import cz.izar.game.event.ActionEvent;
+import cz.izar.game.event.Event;
 import cz.izar.game.mind.Intent;
 
 public class ManipulateAction extends Action {
@@ -36,9 +38,17 @@ public class ManipulateAction extends Action {
 		);
 		Entity target = (Entity)getTarget();
 		if ( null != target ) {
-			Event event = new Event("manipulate");
-			event.setCode(getSubtype().ordinal());
-			target.handle(event);
+			
+			ActionEvent event = new ActionEvent("manipulate",this);
+
+			Environment environment = actor.getEnvironment();
+			environment.dispatch(event);
+
+			if(!event.isDefaultPrevented()) {
+				// TODO: default effect of manipulation
+				event.setPhase(Event.Phase.POST_PHASE);
+				environment.dispatch(event);
+			}
 		}
 		
 		

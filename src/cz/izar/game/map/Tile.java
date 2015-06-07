@@ -1,21 +1,18 @@
 package cz.izar.game.map;
 
-import java.util.ArrayList;
-import java.util.List;
 
-import cz.izar.game.Target;
+import cz.izar.game.Environment;
 import cz.izar.game.entity.Entity;
 import cz.izar.game.presentation.Presentation;
+import cz.izar.game.tree.ListNode;
+import cz.izar.game.tree.Node;
 
-public class Tile implements Target {
-	
-	public static final int ENTITY_DENSITY = 4;
-	
+public class Tile extends ListNode<Entity> implements Localized<Coordinates> {
 	
 	private boolean passable = true;
-	private final List<Entity> entities = new ArrayList<Entity>(ENTITY_DENSITY);
 	private final TileType type;
 	private final long uid;
+	private Coordinates location;
 	
 	
 	protected Tile( TileType type, long uid ) {
@@ -29,8 +26,8 @@ public class Tile implements Target {
 //			System.err.println("IMPASSABLE");
 			return false;
 		}
-		for( Entity entity : getEntities() ) {
-			if( entity.getPassability() ) {
+		for( Node entity : getChildNodes() ) {
+			if( ((Entity)entity).getPassability() ) {
 //				System.err.println("passable "+entity.toString() );
 			} else {
 //				System.err.println("Impassable "+entity.toString() );
@@ -58,22 +55,44 @@ public class Tile implements Target {
 	public String getTypeName() {
 		return getType().getName();
 	}
+	@Override
+	public Coordinates getLocation() {
+		return location;
+	}
+	@Override
+	public void setLocation(Coordinates location) {
+		this.location = location;
+	}
 	public Presentation getPresentation() {
 		return getType().getPresentation();
-	}
-	
-	public List<Entity> getEntities() {
-		return entities;
-	}
-	public void addEntity(Entity entity) {
-		entities.add(entity);
-	}
-	public void removeEntity(Entity entity) {
-		entities.remove(entity);
 	}
 
 	@Override
 	public String toString() {
 		return "Tile("+getUid()+", \""+type.getName()+"\")";
 	}
+
+	@Override
+	protected void setParent(Node parent) {
+		if (!(parent instanceof Environment)) {
+			throw new IllegalArgumentException("Tile have to be placed in Enviroment");
+		}
+		super.setParent(parent);
+	}
+
+	/**
+	 * shortcut
+	 * returns adjacent tile in given direction
+	 * @param direction
+	 * @return
+	 */
+	public Tile in(Direction direction) throws GridIndexOutOfBoundsException {
+		Environment environment = (Environment)getParent();
+		if (null != environment) {
+			return environment.getNodeAt( getLocation().in(direction) );
+		}
+		return null;
+	}
+	
+
 }

@@ -1,4 +1,4 @@
-package cz.izar.game.entity.event;
+package cz.izar.game.event;
 
 public class Event {
 	private final String type;

@@ -3,7 +3,8 @@ package cz.izar.game.mind;
 import java.util.List;
 
 import cz.izar.game.entity.Entity;
-import cz.izar.game.map.Map;
+import cz.izar.game.map.Coordinates;
+import cz.izar.game.map.Tile;
 
 /**
  * interface pro tridy drzici informace o "svete"
@@ -15,7 +16,7 @@ import cz.izar.game.map.Map;
  *
  */
 public interface WorldObservation {
-	public Map getMap();
+	public Tile getNodeAt(Coordinates location);
 	public List<? extends Entity> getEntities();
 	public long getTick();
 	

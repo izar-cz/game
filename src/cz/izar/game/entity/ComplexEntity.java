@@ -1,6 +1,5 @@
 package cz.izar.game.entity;
 
-import cz.izar.game.entity.event.Event;
 import cz.izar.game.entity.manager.Blueprint;
 import cz.izar.game.presentation.Presentation;
 
@@ -27,12 +26,6 @@ public class ComplexEntity extends FeaturefulEntity {
 	@Override
 	public String getProp(int propType) {
 		return core.getProp(propType);
-	}
-
-	@Override
-	public void handle(Event event) {
-//		Log.info("entity ["+toString()+"] is handlig event ["+event.toString()+"]");
-		core.handle(event);
 	}
 
 }

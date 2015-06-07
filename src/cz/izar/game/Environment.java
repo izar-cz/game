@@ -4,53 +4,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.izar.game.entity.Entity;
-import cz.izar.game.entity.event.Event;
 import cz.izar.game.map.Coordinates;
 import cz.izar.game.map.Direction;
-import cz.izar.game.map.Map;
+import cz.izar.game.map.Tile;
 import cz.izar.game.mind.WorldObservation;
+import cz.izar.game.tree.GridNode;
+import cz.izar.game.tree.Node;
 import cz.izar.game.world.World;
 
-public class Environment implements WorldObservation {
-	
+public class Environment extends GridNode<Tile> implements WorldObservation {
 
 	
-	private final World world;
-	private Map map = null;
+	// TODO: currently, an entity is never removed from the list
 	private final List<Entity> entities = new ArrayList<Entity>();
 	private long tick;
 
 	
-	public Environment( World world ) {
-		assert world != null : "world == null";
-		this.world = world;
+	public Environment(int width, int height ) {
+		super(width, height);
 	}
 	
 	public void placeEntity( Entity entity, Coordinates location ) {
 		assert entity != null : "entity == null";
 		assert location != null : "location == null";
 
-		entity.setEnvironment( this );
-		entities.add( entity );
-		
-		entity.setLocation( location );
+		Tile tile = getNodeAt(location);
+		tile.appendChild(entity);
+		entities.add(entity);
 	}
 
 
 	
 	public World getWorld() {
-		return world;
-	}
-
-	public void setMap( Map map ) {
-		if ( this.map != null ) {
-			throw new IllegalStateException("Overriding Map for Environment is not allowed.");
-		}
-		this.map = map;
-	}
-	@Override
-	public Map getMap() {
-		return map;
+		Node node = this;
+		do {
+			node = node.getParent();
+		} while ( !(node instanceof World) && null != node );
+		return (World)node;
 	}
 
 	@Override
@@ -67,29 +57,38 @@ public class Environment implements WorldObservation {
 	public void tick() {
 		++tick;
 	}
-	
-	/**
-	 * dispatch event to all entities in this environment
-	 * @param event
-	 */
-	public void dispatch(Event event) {
-		for (Entity entity : getEntities()) {
-			entity.handle(event);
+
+	@Override
+	protected void removeChild(Node node) {
+		if(node instanceof Tile) {
+			removeGridItem((Tile)node);
 		}
 	}
+	
+	@Override
+	protected void setParent(Node parent) {
+		if (!(parent instanceof World)) {
+			throw new IllegalArgumentException("Enviroment have to be placed in World");
+		}
+		super.setParent(parent);
+	}
 
+	@Override
+	public String getTypeName() {
+		return "ENVIRONMENT";
+	}
 
 	//// STATIC methods
 	
 	public static Direction computeDirection( Entity from, Entity to ) {
-		if ( from.getMap() != to.getMap() ) {
-			throw new IllegalArgumentException("'from' and 'to' must be on the same Map");
+		if ( from.getEnvironment() != to.getEnvironment() ) {
+			throw new IllegalArgumentException("'from' and 'to' must be on the same Environment");
 		}
 		return Direction.fromAngle( from.getLocation(), to.getLocation() );
 	}
 	public static boolean areAdjacent( Entity entity1, Entity entity2 ) {
-		if ( entity1.getMap() != entity2.getMap() ) {
-			throw new IllegalArgumentException("'entity1' and 'entity2' must be on the same Map");
+		if ( entity1.getEnvironment() != entity2.getEnvironment() ) {
+			throw new IllegalArgumentException("'entity1' and 'entity2' must be on the same Environment");
 		}
 		return entity1.getLocation().isAdjacentTo( entity2.getLocation() );
 	}

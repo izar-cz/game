@@ -1,4 +1,4 @@
-package cz.izar.game.entity.event;
+package cz.izar.game.event;
 
 import cz.izar.game.entity.action.Action;
 

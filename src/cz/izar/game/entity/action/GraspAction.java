@@ -1,13 +1,13 @@
 package cz.izar.game.entity.action;
 
 import cz.izar.game.Environment;
-import cz.izar.game.Target;
 import cz.izar.game.entity.Being;
 import cz.izar.game.entity.Entity;
 import cz.izar.game.entity.FeaturefulEntity;
-import cz.izar.game.entity.event.ActionEvent;
-import cz.izar.game.entity.event.Event;
+import cz.izar.game.event.ActionEvent;
+import cz.izar.game.event.Event;
 import cz.izar.game.mind.Intent;
+import cz.izar.game.tree.Node;
 
 public class GraspAction extends Action {
 
@@ -18,7 +18,7 @@ public class GraspAction extends Action {
 		if (!(actor instanceof FeaturefulEntity)) {
 			throw new ActionException("GraspAction: actor must be instanceof FeaturefulEntity.");
 		}
-		Target target = getTarget();
+		Node target = getTarget();
 		if (null == target) {
 			throw new ActionException("GraspAction: target is required.");
 		}
@@ -59,14 +59,8 @@ public class GraspAction extends Action {
 	}
 	@Override
 	protected void doEffect() {
-		Entity item = (Entity)getTarget();
-		/*
-			if (entity.item) {
-				
-			}
-		
-		
-		 */
+		Entity item = (Entity)getTarget(); // see constructor
+
 		if (item instanceof Being) {
 			// TODO: allow taking beings (currently, game breaks when a being is in any inventory)
 			return;

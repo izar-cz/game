@@ -3,13 +3,12 @@ package cz.izar.game.world;
 import cz.izar.game.Environment;
 import cz.izar.game.entity.manager.EntityManager;
 import cz.izar.game.map.TileManager;
+import cz.izar.game.tree.ListNode;
 
-public class World {
+public class World extends ListNode<Environment> {
 	
 	private TileManager tileManager;
 	private EntityManager entityManager;
-	// TODO: World should be capable to hold more environments
-	private Environment environment;
 
 	public TileManager getTileManager() {
 		return tileManager;
@@ -27,14 +26,11 @@ public class World {
 		this.entityManager = entityManager;
 	}
 
-	public Environment getEnvironment() {
-		return environment;
+	@Override
+	public String getTypeName() {
+		return "WORLD";
 	}
 
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
-	}
-	
 	
 	
 	

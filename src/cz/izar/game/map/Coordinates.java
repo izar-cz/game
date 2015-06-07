@@ -1,7 +1,7 @@
 package cz.izar.game.map;
 
 
-public class Coordinates {
+public class Coordinates implements Localized.Location {
 	public final int x;
 	public final int y;
 	

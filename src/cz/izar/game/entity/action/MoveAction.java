@@ -1,10 +1,12 @@
 package cz.izar.game.entity.action;
 
+import cz.izar.game.Log;
 import cz.izar.game.entity.Being;
 import cz.izar.game.entity.Entity;
-import cz.izar.game.map.Coordinates;
 import cz.izar.game.map.Direction;
+import cz.izar.game.map.GridIndexOutOfBoundsException;
 import cz.izar.game.map.OffsetCoordinates;
+import cz.izar.game.map.Tile;
 import cz.izar.game.mind.Intent;
 
 public class MoveAction extends Action {
@@ -39,11 +41,13 @@ public class MoveAction extends Action {
 
 	@Override
 	protected void doEffect() {
-		Coordinates destination = actor.getLocation().in(
-			getDirection()
-		);
-		if( actor.getEnvironment().getMap().isPassable( destination ) ) {
-			actor.setLocation( destination );
+		try {
+			Tile destination = actor.getTile().in(getDirection());
+			if ( destination.isPassable() ) {
+				destination.appendChild(actor);
+			}
+		} catch (GridIndexOutOfBoundsException ex) {
+			Log.warn(ex.getMessage());
 		}
 	}
 

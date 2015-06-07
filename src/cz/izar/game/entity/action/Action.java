@@ -1,9 +1,9 @@
 package cz.izar.game.entity.action;
 
-import cz.izar.game.Target;
 import cz.izar.game.entity.Entity;
 import cz.izar.game.map.Direction;
 import cz.izar.game.mind.Intent;
+import cz.izar.game.tree.Node;
 
 public class Action {
 
@@ -13,7 +13,7 @@ public class Action {
 	protected final Entity actor;
 	
 	// all this properties are optional (i.e. null value is permitted)
-	protected final Target target;
+	protected final Node target;
 	protected final Entity tool;
 	
 	protected final short ticksTotal;
@@ -59,7 +59,7 @@ public class Action {
 	/**
 	 * @return primary target of action (Tile, Entity, entity Feature)
 	 */
-	public Target getTarget() {
+	public Node getTarget() {
 		return target;
 	}
 	

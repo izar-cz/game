@@ -3,7 +3,6 @@ package cz.izar.game.sample;
 import cz.izar.game.entity.Entity;
 import cz.izar.game.map.Coordinates;
 import cz.izar.game.map.Direction;
-import cz.izar.game.map.Map;
 import cz.izar.game.map.Tile;
 import cz.izar.game.mind.Adapter;
 import cz.izar.game.mind.Intent;
@@ -47,7 +46,7 @@ public class DummyMind implements Mind, Runnable {
 
 			if ( null != perceivedWorld ) {
 				Intent intent = null;
-				Map map = adapter.getPerceivedWorld().getMap();
+				WorldObservation map = adapter.getPerceivedWorld();
 				Coordinates location = adapter.getLocation();
 
 				Direction direction = adapter.getDirection();
@@ -62,12 +61,12 @@ public class DummyMind implements Mind, Runnable {
 
 				Coordinates targetLocation = location.in(direction);
 				try {
-					Tile tile = map.getAt(targetLocation);
+					Tile tile = map.getNodeAt(targetLocation);
 					
 					if ( tile.isPassable() ) {
 						intent = Intent.walk(direction);
 					} else {
-						Entity targetEntity = tile.getEntities().get(0);
+						Entity targetEntity = tile.getChildNodes().get(0);
 						if( null != targetEntity ) {
 							if( number > 1 ) {
 								intent = Intent.push(targetEntity, direction);

@@ -18,13 +18,12 @@ import cz.izar.game.Environment;
 import cz.izar.game.Log;
 import cz.izar.game.entity.Being;
 import cz.izar.game.entity.Entity;
-import cz.izar.game.entity.FeaturefulEntity;
 import cz.izar.game.entity.action.Action;
 import cz.izar.game.entity.action.MoveAction;
 import cz.izar.game.graphics.sprite.EntitySprite;
 import cz.izar.game.graphics.sprite.Sprite;
+import cz.izar.game.map.Coordinates;
 import cz.izar.game.map.Direction;
-import cz.izar.game.map.Map;
 import cz.izar.game.map.OffsetCoordinates;
 import cz.izar.game.map.Tile;
 
@@ -90,31 +89,30 @@ public class MapView extends Canvas {
 
 	}
 	
-	public void draw( Environment world ) {
+	public void draw( Environment environment ) {
 		// Get hold of a graphics context for the accelerated 
 		// surface and blank it out
 		Graphics2D context = (Graphics2D) strategy.getDrawGraphics();
 		context.setColor(Color.black);
 		context.fillRect(0,0,672,672);
 //		context.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		
-		Map map = world.getMap();
-		long tick = world.getTick();
+
+		long tick = environment.getTick();
 
 		int graphicsTick = (int)tick % GRAPHICS_PERIOD;
 		Tile tile;
 
-		for (int x = 0 ; x < map.getWidth() ; x++) {
-			for (int y = 0 ; y < map.getHeight() ; y++) {
-				tile = map.getAt(x,y);
+		for (int x = 0 ; x < environment.getWidth() ; x++) {
+			for (int y = 0 ; y < environment.getHeight() ; y++) {
+				tile = environment.getNodeAt(new Coordinates(x,y));
 				drawTile( tile, context, x, y, graphicsTick + 13 * x + y*x );
 			}
 		}
 
 		List<? extends Entity> entities; // = world.getEntities();
-		for (int y = 0 ; y < map.getHeight() ; y++) {
-			for (int x = 0 ; x < map.getWidth() ; x++) {
-				entities = map.getAt(x,y).getEntities();
+		for (int y = 0 ; y < environment.getHeight() ; y++) {
+			for (int x = 0 ; x < environment.getWidth() ; x++) {
+				entities = environment.getNodeAt(new Coordinates(x,y)).getChildNodes();
 				for(Entity entity:entities ){
 					drawEntity(entity, context, x, y, graphicsTick);
 				}
@@ -146,12 +144,13 @@ public class MapView extends Canvas {
 		
 		getEntitySprite(entity,entity).draw(context, offsetX, offsetY, graphicsTick);
 		
-		if (entity instanceof FeaturefulEntity) {
-			List<Entity> inventory = ((FeaturefulEntity)entity).getInventory();
-			for (Entity item : inventory) {
-				getEntitySprite(item,entity).draw(context, offsetX, offsetY, graphicsTick);
-			}
-		}
+//		TODO: show inventory items
+//		if (entity instanceof FeaturefulEntity) {
+//			List<Entity> inventory = ((FeaturefulEntity)entity).getInventory();
+//			for (Entity item : inventory) {
+//				getEntitySprite(item,entity).draw(context, offsetX, offsetY, graphicsTick);
+//			}
+//		}
 
 		String description = entity.toString();
 		context.setColor(Color.BLACK);
