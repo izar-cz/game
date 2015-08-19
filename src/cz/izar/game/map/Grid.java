@@ -5,12 +5,13 @@ import cz.izar.game.Log;
 public class Grid<T extends Localized<Coordinates>> {
 	private final int width;
 	private final int height;
-	protected final T[][] items;
+	private final Localized<?>[][] items;
+	// items would contain only T. (extends Localized<Coordinates>)
 
 	public Grid( int width, int height ) {
 		this.width = width;
 		this.height = height;
-		items = (T[][]) new Localized[width][height];
+		items = new Localized<?>[width][height];
 	}
 	
 	
@@ -53,11 +54,13 @@ public class Grid<T extends Localized<Coordinates>> {
 		return getAt(new Coordinates(x,y));
 	}
 
+	// casting "Localized<?>" to "T" is safe for elements in "items"
+	@SuppressWarnings("unchecked")
 	public T getAt(Coordinates location) throws GridIndexOutOfBoundsException {
 		assert null != location;
 		T item;
 		try {
-			item = items[location.x][location.y];
+			item = (T)items[location.x][location.y];
 		} catch (ArrayIndexOutOfBoundsException ex) {
 			throw new GridIndexOutOfBoundsException(ex, location);
 		}

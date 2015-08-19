@@ -4,61 +4,47 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import cz.izar.game.Log;
-import cz.izar.game.entity.manager.EntityManager;
-import cz.izar.game.map.TileManager;
 import cz.izar.game.utils.UidManager;
 import cz.izar.game.world.World;
 
 public class JsEngine {
 
 	private boolean javaReady = false;
-	
-	private Context context;
-	private Scriptable scope = null;
+
+	private ScriptEngine engine;
+
 
 	public JsEngine() {
-		System.out.println("<JsEngine construct>");
-//		jsLoader = new JsLoader();
-		context = Context.enter();
-		scope = context.initStandardObjects();
-		System.out.println("</JsEngine construct>");
+		engine = new ScriptEngineManager().getEngineByName("nashorn");
+		assert(engine != null);
+
+		engine.getBindings(ScriptContext.ENGINE_SCOPE).put("jsEngine", this);
 	}
 	
-	public void setJavaObjects(World world, TileManager tileManager, EntityManager entityManager, UidManager uidManager) {
-		assert tileManager != null;
-		assert entityManager != null;
-		setJavaObject(tileManager,"tileManager");
-		setJavaObject(entityManager,"entityManager");
-		setJavaObject(uidManager,"uidManager");
-		setJavaObject(world,"world");
+	public void setJavaObjects(World world, UidManager uidManager) {
+		Bindings scope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+		scope.put("uidManager", uidManager);
+		scope.put("world", world);
 		javaReady = true;
 	}
-	
+
 	public void start() {
 		if (!javaReady) {
 			throw new IllegalStateException("it is necesary to 'setJavaObject()' before starting JS engine");
 		}
-		evaluateFile( "cz/izar/game/js/engine.js" );
+		evaluateFile( "cz/izar/game/js/bootstrap.js" );
 	}
+
 	public void evaluateResources(String category) {
 		evaluateFile( "resources/"+category+"/basic.js" );
 	}
-	
-	
-	
-	
-	
-	
-	private void setJavaObject(Object object, String name) {
-		Object wrappedObject = Context.javaToJS(object, scope);
-		ScriptableObject.putProperty(scope, name, wrappedObject);
-	}
-	
 	
 	
 	/**
@@ -67,27 +53,44 @@ public class JsEngine {
 	 */
 	private void evaluateFile( String path ) {
 		java.io.Reader reader;
-		int idx = path.replaceAll("\\\\", "/").lastIndexOf("/");
-		String fileName = idx >= 0
-			? path.substring(idx + 1)
-			: path;
+//		int idx = path.replaceAll("\\\\", "/").lastIndexOf("/");
+//		String fileName = idx >= 0
+//			? path.substring(idx + 1)
+//			: path;
+		String fileName = path;
 
+		Object oldFilename = engine.get(ScriptEngine.FILENAME);
 		try {
 			reader = getReader( path );
-			context.evaluateReader(scope, reader, fileName, 1, null);
+			engine.put(ScriptEngine.FILENAME, fileName);
+			engine.eval(reader);
 		} catch (IOException e) {
 			Log.error(e.getMessage());
 			e.printStackTrace();
+		} catch (ScriptException e) {
+			Log.error("JS exception: "+e.getMessage());
+			e.printStackTrace();
+		} finally {
+			engine.put(ScriptEngine.FILENAME, oldFilename);
 		}
 	}
 	/**
 	 * TODO: premistit jinam
 	 */
 	private java.io.Reader getReader( String path ) throws IOException {
-		URL url = this.getClass().getClassLoader().getResource(path);
+		URL url = JsEngine.class.getClassLoader().getResource(path);
 		if (url == null) {
 			throw new IllegalArgumentException("failed to locate script "+path);
 		}
 		return new InputStreamReader(url.openStream());
+	}
+	
+	
+	
+	public void load(String path){
+		evaluateFile("cz/izar/game/js/" + path + ".js");
+	}
+	public String getPath() {
+		return (String)engine.get(ScriptEngine.FILENAME);
 	}
 }

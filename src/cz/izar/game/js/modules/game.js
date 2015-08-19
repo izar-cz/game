@@ -1,23 +1,16 @@
-/**
- * 
- */
-function log(msg) {
-	java.lang.System.out.println("[JS] "+msg);
-}
-log.error = function (msg) {
-	java.lang.System.out.println("[JS ERROR] "+msg);
-};
-
-log('<engine.js>');
 
 
-game = (function(){
+define(['log'], function(log){
+
 	var game = {};
-	var _entityManager = entityManager;
-	var _tileManager = tileManager;
-	var _uidManager = uidManager;
 	var _world = world;
-	var gamePackage = Packages.cz.izar.game;
+	var _entityManager = world.getEntityManager();
+	var _tileManager = world.getTileManager();
+	var _uidManager = uidManager;
+	var gamePackage = function(name){
+		return Java.type('cz.izar.game.'+name);
+	};
+
 	var properties = {
 			1:  'name',
 			2:  'description',
@@ -32,7 +25,7 @@ game = (function(){
 			log.error("tileManager not initialized!");
 			return;
 		}
-		if( ! _tileManager instanceof gamePackage.map.TileManager ) {
+		if( ! _tileManager instanceof gamePackage('map.TileManager') ) {
 			log.error("tileManager not instanceof cz.izar.game.map.TileManager!");
 			return;
 		}
@@ -46,7 +39,7 @@ game = (function(){
 			log.error("entityManager not initialized!");
 			return;
 		}
-		if( ! _entityManager instanceof gamePackage.manager.EntityManager ) {
+		if( ! _entityManager instanceof gamePackage('entity.manager.EntityManager') ) {
 			log.error("entityManager not instanceof cz.izar.game.entity.manager.EntityManager!");
 			return;
 		}
@@ -61,7 +54,7 @@ game = (function(){
 //			log.error("entityManager not initialized!");
 //			return;
 //		}
-//		if( ! _entityManager instanceof gamePackage.manager.EntityManager ) {
+//		if( ! _entityManager instanceof gamePackage('manager.EntityManager') ) {
 //			log.error("entityManager not instanceof cz.izar.game.entity.manager.EntityManager!");
 //			return;
 //		}
@@ -78,11 +71,11 @@ game = (function(){
 			mapHeight = mapConfig.height;
 
 
-		var environment = new gamePackage.Environment( mapWidth, mapHeight ),
+		var environment = new (gamePackage('Environment'))( mapWidth, mapHeight ),
 			_placeEntity = function( blueprintId, x, y ) {
 				log( 'placing entity "'+blueprintId+'" at ('+x+', '+y+')' );
 				var entity = _entityManager.createEntity(blueprintId);
-				environment.placeEntity( entity, new gamePackage.map.Coordinates(x, y) );
+				environment.placeEntity( entity, new (gamePackage('map.Coordinates'))(x, y) );
 			};
 
 		_world.appendChild( environment );
@@ -107,7 +100,7 @@ game = (function(){
 					throw 'invalid tile';
 				}
 				tile = _tileManager.createTile(tileConfig.tile);
-				environment.setNodeAt(new gamePackage.map.Coordinates(x, y), tile);
+				environment.setNodeAt(new (gamePackage('map.Coordinates'))(x, y), tile);
 				if( tileConfig.entity ) {
 					_placeEntity( tileConfig.entity, x, y );
 				}
@@ -137,15 +130,15 @@ game = (function(){
 			passability = !!config.passability;
 		
 		log('Adding tile type "'+name+'"');
-		var type = new gamePackage.map.TileType( name, passability );
+		var type = new (gamePackage('map.TileType'))( name, passability );
 
 		if ( config.presentation ) {
-			type.setPresentation( new gamePackage.presentation.SimplePresentation( config.presentation ) );
+			type.setPresentation( new (gamePackage('presentation.SimplePresentation'))( config.presentation ) );
 		}
 
 		_tileManager.addType(type);
 		if ( config['default'] ) {
-			tileManager.setDefault(type);
+			_tileManager.setDefault(type);
 		}
 	}
 	
@@ -154,16 +147,16 @@ game = (function(){
 			passability = !!config.passability,
 			entityName = config.name || name;
 		log('Adding simple blueprint "'+name+'"');
-		return gamePackage.entity.manager.SimpleBlueprint(uid, name, ''+entityName, passability);
+		return gamePackage('entity.manager.SimpleBlueprint')(uid, name, ''+entityName, passability);
 	}
 	
 	function _createComplexBlueprint(config, uid) {
 		var name = config.id;
 		log('Adding complex blueprint "'+name+'"');
-		var blueprintCore = new gamePackage.entity.manager.ComplexBlueprintCore({
+		var blueprintCore = new (gamePackage('entity.manager.ComplexBlueprintCore'))({
 			createCore: function(){
 				var entity = _cloneConfig(config);
-				var presentation = new gamePackage.presentation.Presentation({
+				var presentation = new (gamePackage('presentation.Presentation'))({
 					getMap: function(key) {
 						return null;
 					},
@@ -174,16 +167,16 @@ game = (function(){
 							: ""+value;
 					}
 				});
-				return new gamePackage.entity.ComplexEntityCore({
+				return new (gamePackage('entity.ComplexEntityCore'))({
 					getPassability: function(){ return !!_resolve(entity.passability, entity); },
 					getPresentation: function(){ return presentation; },
 					getProp: function(propType){ return ""+_resolve(entity[properties[propType]], entity); },
 					handle: function(event) {
-						if(event instanceof gamePackage.entity.event.ActionEvent ) {
+						if(event instanceof gamePackage('entity.event.ActionEvent') ) {
 							var action = event.getAction(),
 								target = action.getTarget();
 							if (null !== target) {
-								if (target instanceof gamePackage.entity.ComplexEntity) {
+								if (target instanceof gamePackage('entity.ComplexEntity')) {
 								}
 							}
 						}
@@ -201,8 +194,8 @@ game = (function(){
 			}
 		});
 		return config.intelligence
-			? gamePackage.entity.manager.BeingBlueprint(uid, name, blueprintCore)
-			: gamePackage.entity.manager.ComplexBlueprint(uid, name, blueprintCore);
+			? new (gamePackage('entity.manager.BeingBlueprint'))(uid, name, blueprintCore)
+			: new (gamePackage('entity.manager.ComplexBlueprint'))(uid, name, blueprintCore);
 	}
 	function _cloneConfig(config) {
 		return config;
@@ -214,9 +207,7 @@ game = (function(){
 		return value;
 	}
 	
-	
+	print('GAME ok'+game)
 	return game;
-})();
+});
 
-
-log('</engine.js>');

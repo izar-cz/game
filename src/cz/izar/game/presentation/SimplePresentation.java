@@ -2,13 +2,13 @@ package cz.izar.game.presentation;
 
 import java.util.Map;
 
-import org.mozilla.javascript.NativeObject;
+import jdk.nashorn.api.scripting.JSObject;
 
 public class SimplePresentation implements Presentation {
 
-	private NativeObject data = null;
+	private JSObject data = null;
 
-	public SimplePresentation(NativeObject data) {
+	public SimplePresentation(JSObject data) {
 		this.data = data;
 	}
 
@@ -20,7 +20,7 @@ public class SimplePresentation implements Presentation {
 
 	@Override
 	public String getString( String key ) {
-		Object value = data.get(key);
+		Object value = data.getMember(key);
 		if( value instanceof CharSequence ) {
 			return value.toString();
 		}

@@ -23,25 +23,22 @@ public class WorldLoader extends Loader {
 		EntityManager entityManager = new EntityManager( uidManager );
 
 		// base world object
-		World world = new World();
+		World world = new World(entityManager, tileManager);
 
-		
 		// start JS engine
 		JsEngine jsEngine = new JsEngine();
-		jsEngine.setJavaObjects(world, tileManager, entityManager, uidManager);
+		jsEngine.setJavaObjects(world, uidManager);
+//		jsEngine.define("world", world);
+//		jsEngine.define("uidManager", uidManager);
+
 		jsEngine.start();
 		setJsEngine( jsEngine );
 
-
-
-
 		// prepare tileManager
 		getJsEngine().evaluateResources("tiles");
-		world.setTileManager( tileManager );
 
 		// prepare entityManager
 		getJsEngine().evaluateResources("objects");
-		world.setEntityManager( entityManager );
 		
 		//construct environment
 		// TODO: load from resources
